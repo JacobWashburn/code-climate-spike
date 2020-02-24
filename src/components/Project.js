@@ -22,11 +22,11 @@ const Project = ({project, token}) => {
     <div>
       <h2>{project.name}</h2>
       {project.team.length ? project.team.map(member => {
-        {if (member.role === 'M') {
+        if (member.role === 'M') {
           return <h3 key={member.name}>Manager:{member.name}</h3>;
         } else {
           return <p key={member.name}>{member.role}:{member.name}</p>;
-        }}
+        }
       }): <h2>No Team Members Yet</h2>}
       <div>
         <h2>Repos</h2>
