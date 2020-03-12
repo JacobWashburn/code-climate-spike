@@ -18,17 +18,18 @@ const LandingPage = ({state, setState, history}) => {
     axios.get('https://api.codeclimate.com/v1/repos/5dcc150b234ac30e83009498/ref_points?filter[branch]=master', {headers: {Authorization:'Token token=a8bd69e0e7cafd98a0581184ae71ffbf13b53cd8'}})
       .then(res => {
         console.log('res', res);
-        const snapshotList = res.data.data.map(stuff => stuff.relationships.snapshot.data.id);
+        const snapshotList = res.data.data.map(stuff => ({id:stuff.relationships.snapshot.data.id, createdAt:stuff.attributes.created_at}));
         setSnapshots(snapshotList)
       })
   },[]);
 
   useEffect(() => {
-    Promise.all(snapshots.map(snapshot => axios.get(`https://api.codeclimate.com/v1/repos/5dcc150b234ac30e83009498/snapshots/${snapshot}`, {headers: {Authorization:'Token token=a8bd69e0e7cafd98a0581184ae71ffbf13b53cd8'}})
-      .then(res => res.data.data.attributes.ratings[0].letter)
+    Promise.all(snapshots.map(snapshot => axios.get(`https://api.codeclimate.com/v1/repos/5dcc150b234ac30e83009498/snapshots/${snapshot.id}`, {headers: {Authorization:'Token token=a8bd69e0e7cafd98a0581184ae71ffbf13b53cd8'}})
+      .then(res => ({grade: res.data.data.attributes.ratings[0].letter, createdAt: snapshot.createdAt}))
       .catch(error => console.log('error res', error))
     ))
       .then(res => {
+        console.log('rere', res);
         setGrades(res)
       })
 
@@ -67,18 +68,18 @@ const LandingPage = ({state, setState, history}) => {
 {/*          <Button type='submit'>Submit</Button>*/}
 {/*        </Form>*/}
 {/*      </Div>*/}
-  if ( !state.orgs.length) {
+  if ( grades.length ) {
     return (
 
     <div>
-      {grades.map(grade => grade ? <p>{grade}</p>:<p>No grade.</p>)}
+      {grades.map(grade => grade ? <p>{grade.grade}---{grade.createdAt}</p>:<p>No grade.</p>)}
     </div>
     );
   } else {
     return (
       <div>
         <button onClick={e => {e.stopPropagation(); history.push('/chooseorg')}}>Add Organization</button>
-      <Projects state={state} history={history}/>
+      {/*<Projects state={state} history={history}/>*/}
       </div>
       )
   }
